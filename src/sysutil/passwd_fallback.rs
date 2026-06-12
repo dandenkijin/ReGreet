@@ -15,7 +15,7 @@ use pwd::Passwd;
 use tracing::{debug, warn};
 
 /// UID boundaries for "normal" users, read from `/etc/login.defs`.
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 struct UidBounds {
     min: u64,
     max: u64,

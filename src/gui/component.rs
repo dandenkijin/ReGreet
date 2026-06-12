@@ -4,7 +4,7 @@
 
 //! Setup for using the greeter as a Relm4 component
 
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use relm4::{
     AsyncComponentSender,
