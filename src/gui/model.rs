@@ -5,6 +5,7 @@
 
 //! The main logic for the greeter
 
+use std::collections::HashMap;
 use std::path::Path;
 use std::process::Command;
 use std::sync::Arc;
@@ -136,7 +137,15 @@ impl Greeter {
             greetd_client,
             sys_util: SysUtil::new(&config)
                 .await
-                .expect("Couldn't read available users and sessions"),
+                .unwrap_or_else(|e| {
+                    warn!("Failed to initialize system utilities: {e}");
+                    warn!("Using empty user/session data");
+                    SysUtil {
+                        users: HashMap::new(),
+                        shells: HashMap::new(),
+                        sessions: HashMap::new(),
+                    }
+                }),
             cache: Cache::new(),
             sess_info: None,
             config,
