@@ -9,13 +9,20 @@ use crate::config::GlassConfig;
 /// Generate the glass CSS string from the given config values.
 pub fn generate_glass_css(_config: &GlassConfig) -> String {
     // Use hardcoded values for reliable glass effect
-    // Single glass-card rule with semi-transparent background
+    // Ensure frame, grid, and all children are transparent so backdrop-filter works
     r##".glass-card {
     background-color: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(25px);
     border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.25);
     padding: 20px;
+}
+
+/* Force frame and all children transparent so backdrop-filter can see through */
+.glass-card,
+.glass-card > *,
+.glass-card > * > * {
+    background-color: transparent;
 }
 
 @keyframes glass-breathe {

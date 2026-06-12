@@ -421,7 +421,7 @@ impl AsyncComponent for Greeter {
 
         // Apply the liquid glass effect if enabled in config.
         // Supports both [glass] enabled = true and [appearance] enable_glass_effect = true.
-        // Load after custom CSS so glass styles take precedence.
+        // Load at USER priority (higher than APPLICATION) to override custom CSS/theme.
         let glass_config = model.config.get_glass();
         let appearance = &model.config.appearance;
         let glass_enabled = glass_config.enabled || appearance.enable_glass_effect;
@@ -435,7 +435,7 @@ impl AsyncComponent for Greeter {
             gtk::style_context_add_provider_for_display(
                 &widgets.ui.display(),
                 &provider,
-                gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
+                gtk::STYLE_PROVIDER_PRIORITY_USER,
             );
         }
 
