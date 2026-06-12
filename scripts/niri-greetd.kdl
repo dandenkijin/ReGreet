@@ -1,0 +1,87 @@
+// Niri configuration for greetd greeter session
+// Install this at /etc/greetd/niri-greetd.kdl
+
+// Input configuration
+input {
+    keyboard {
+        xkb {
+            // Use system locale settings
+        }
+    }
+
+    touchpad {
+        tap
+        natural-scroll
+    }
+}
+
+// Output configuration
+// Adjust mode/scale/position to match your display
+output "*" {
+    // Use the preferred mode
+    // mode "1920x1080@60"
+    // scale 1.0
+    // position x=0 y=0
+}
+
+// Layout settings
+layout {
+    gaps 0
+
+    focus-ring {
+        width 2
+        active-color "#7fc8ff"
+        inactive-color "#505050"
+    }
+
+    border {
+        off
+    }
+
+    shadow {
+        off
+    }
+
+    struts {
+        left 0
+        right 0
+        top 0
+        bottom 0
+    }
+}
+
+// Spawn ReGreet as the greeter application
+// GREETD_SOCK is set by greetd when it spawns this session
+spawn-at-startup "regreet"
+
+// Window rules for ReGreet
+window-rule {
+    // Match ReGreet by app-id
+    match app-id="^apps\\.regreet$"
+
+    // Open fullscreen on the default output
+    open-fullscreen true
+
+    // Ensure the window is always on top
+    open-on-top true
+}
+
+// Disable the hotkey overlay for a clean greeter experience
+hotkey-overlay {
+    skip-at-startup
+}
+
+// Screenshot path (not needed for greeter, but avoids errors)
+screenshot-path null
+
+// Keybinds — minimal set for a greeter session
+binds {
+    // Allow VT switching for debugging
+    Mod+Shift+Slash { show-hotkey-overlay; }
+
+    // Quit niri (for debugging only — normally greetd manages the session)
+    Mod+Shift+E { quit; }
+
+    // Power off monitors (DPMS)
+    Mod+Shift+P { power-off-monitors; }
+}
