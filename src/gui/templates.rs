@@ -44,6 +44,7 @@ impl WidgetTemplate for Ui {
                 set_halign: gtk::Align::Center,
                 set_valign: gtk::Align::Center,
                 add_css_class: "background",
+                add_css_class: "glass-login",
 
                 gtk::Grid {
                     set_column_spacing: 15,

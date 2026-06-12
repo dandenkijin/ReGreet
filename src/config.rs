@@ -127,6 +127,69 @@ fn default_greeting_msg() -> String {
     GREETING_MSG.to_string()
 }
 
+/// Struct for the liquid glass login card effect
+#[derive(Default, Deserialize)]
+pub struct GlassConfig {
+    #[serde(default)]
+    pub enabled: bool,
+
+    #[serde(default = "default_glass_blur")]
+    pub blur: u32,
+
+    #[serde(default = "default_glass_opacity")]
+    pub opacity: f64,
+
+    #[serde(default = "default_glass_opacity_min")]
+    pub opacity_min: f64,
+
+    #[serde(default = "default_glass_duration")]
+    pub duration: String,
+
+    #[serde(default = "default_glass_border_radius")]
+    pub border_radius: u32,
+
+    #[serde(default = "default_glass_border_color")]
+    pub border_color: String,
+
+    #[serde(default = "default_glass_highlight_color")]
+    pub highlight_color: String,
+
+    #[serde(default = "default_glass_shadow_color")]
+    pub shadow_color: String,
+}
+
+fn default_glass_blur() -> u32 {
+    39
+}
+
+fn default_glass_opacity() -> f64 {
+    0.07
+}
+
+fn default_glass_opacity_min() -> f64 {
+    0.88
+}
+
+fn default_glass_duration() -> String {
+    "4s".to_string()
+}
+
+fn default_glass_border_radius() -> u32 {
+    20
+}
+
+fn default_glass_border_color() -> String {
+    "rgba(255, 255, 255, 0.15)".to_string()
+}
+
+fn default_glass_highlight_color() -> String {
+    "rgba(255, 255, 255, 0.25)".to_string()
+}
+
+fn default_glass_shadow_color() -> String {
+    "rgba(0, 0, 0, 0.3)".to_string()
+}
+
 /// The configuration struct
 #[derive(Default, Deserialize)]
 pub struct Config {
@@ -150,6 +213,9 @@ pub struct Config {
 
     #[serde(default)]
     pub(crate) widget: WidgetConfig,
+
+    #[serde(default)]
+    glass: GlassConfig,
 }
 
 #[derive(Deserialize, Default)]
@@ -190,5 +256,9 @@ impl Config {
 
     pub fn skip_selection(&self) -> bool {
         self.skip_selection
+    }
+
+    pub fn get_glass(&self) -> &GlassConfig {
+        &self.glass
     }
 }

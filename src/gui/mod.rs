@@ -5,6 +5,7 @@
 //! The main GUI for the greeter
 
 mod component;
+mod glass;
 mod messages;
 mod model;
 mod templates;

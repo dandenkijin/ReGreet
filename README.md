@@ -51,6 +51,7 @@ the Roboto font. All screenshots are provided under the
   - Font
 - Allows changing reboot & poweroff commands for different init systems
 - Supports custom CSS files for further customizations
+- Liquid glass login card effect with configurable blur, opacity, border, and breathing animation
 - Respects `XDG_DATA_DIRS` environment variable
 - Respects fields `Hidden` and `NoDisplay` in session files
 - Picks up the first found session with the same name and in the same type
@@ -314,6 +315,7 @@ following can be configured:
 - Shut down command
 - X11 command prefix (see
   [this explanation on Reddit](https://web.archive.org/web/20240803120131/https://old.reddit.com/r/linux/comments/1c8zdcw/using_x11_window_managers_with_greetd_login/))
+- Liquid glass login card effect (blur, opacity, border, animation)
 
 **NOTE:** For configuring other essential features, such as the keyboard
 layout/mapping, the choice of monitor to use, etc., please check out the
@@ -352,6 +354,40 @@ explore the CSS hierarchy and test out your CSS before making it permanent.
 **Tip:** If you're using an LLM to help you create a basic CSS file, give it all
 the links above in this subsection along with this file from the ReGreet source
 code: [src/gui/templates.rs](./src/gui/templates.rs).
+
+### Liquid Glass Login Card
+
+ReGreet supports a liquid glass (frosted glass) effect on the login card,
+featuring backdrop blur, a semi-transparent tinted background, and a subtle
+breathing animation.
+
+To enable it, add a `[glass]` section to your config:
+
+```toml
+[glass]
+enabled = true
+blur = 39
+opacity = 0.07
+opacity_min = 0.88
+duration = "4s"
+border_radius = 20
+border_color = "rgba(255, 255, 255, 0.15)"
+highlight_color = "rgba(255, 255, 255, 0.25)"
+shadow_color = "rgba(0, 0, 0, 0.3)"
+```
+
+All options are optional — the defaults above are used when `enabled = true`.
+See [`regreet.sample.toml`](regreet.sample.toml) for descriptions of each option.
+
+**GTK version note:** The `backdrop-filter: blur()` effect requires GTK 4.22+
+(GNOME 50, released March 2026). On older GTK versions, the glass card still
+renders with the semi-transparent background, border, and animation — just
+without the backdrop blur. The effect degrades gracefully.
+
+You can override any glass style property in your
+[custom CSS](#custom-css) by targeting the `.glass-login` class. Custom CSS
+generated from config is loaded before your `regreet.css`, so your CSS takes
+precedence.
 
 ### Changing Reboot/Shut Down Commands
 
