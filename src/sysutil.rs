@@ -5,6 +5,7 @@
 //! Helper for system utilities like users and sessions
 
 mod accounts_service;
+mod passwd_fallback;
 
 use std::collections::{HashMap, HashSet};
 use std::env;
@@ -20,6 +21,7 @@ use self::accounts_service::AccountsServiceProxy;
 use self::accounts_service::UserProxy;
 use crate::config::Config;
 use crate::constants::SESSION_DIRS;
+
 
 /// XDG data directory variable name (parent directory for X11/Wayland sessions)
 const XDG_DIR_ENV_VAR: &str = "XDG_DATA_DIRS";
@@ -45,56 +47,113 @@ type SessionMap = HashMap<String, SessionInfo>;
 /// Stores info of all regular users and sessions
 pub struct SysUtil {
     /// Maps a user's full name to their system username
-    users: UserMap,
+    pub users: UserMap,
     /// Maps a system username to their shell
-    shells: ShellMap,
+    pub shells: ShellMap,
     /// Maps a session's full name to its command
-    sessions: SessionMap,
+    pub sessions: SessionMap,
 }
 
 impl SysUtil {
     pub async fn new(config: &Config) -> Result<Self, Box<dyn Error>> {
-        let dbus_system_conn = Connection::system().await?;
-        let accounts_proxy = AccountsServiceProxy::new(&dbus_system_conn).await?;
+        let (users, shells) = match Self::try_dbus_users().await {
+            Some(result) => {
+                debug!("Using D-Bus AccountsService for user discovery");
+                result
+            }
+            None => {
+                warn!("D-Bus AccountsService unavailable, falling back to /etc/passwd");
+                passwd_fallback::discover_users()
+            }
+        };
+
+        let sessions = match Self::init_sessions(config).await {
+            Ok(sessions) => sessions,
+            Err(err) => {
+                warn!("Failed to discover sessions: {err}");
+                HashMap::new()
+            }
+        };
+
+        Ok(Self {
+            users,
+            shells,
+            sessions,
+        })
+    }
+
+    /// Try to discover users via D-Bus AccountsService.
+    ///
+    /// Returns `Some((users, shells))` on success, or `None` if D-Bus is unavailable
+    /// or AccountsService is not running.
+    async fn try_dbus_users() -> Option<(UserMap, ShellMap)> {
+        let dbus_system_conn = match Connection::system().await {
+            Ok(conn) => conn,
+            Err(err) => {
+                debug!("D-Bus system connection failed: {err}");
+                return None;
+            }
+        };
+
+        let accounts_proxy = match AccountsServiceProxy::new(&dbus_system_conn).await {
+            Ok(proxy) => proxy,
+            Err(err) => {
+                debug!("AccountsService proxy creation failed: {err}");
+                return None;
+            }
+        };
+
+        let user_paths = match accounts_proxy.list_cached_users().await {
+            Ok(paths) => paths,
+            Err(err) => {
+                debug!("Failed to list cached users via D-Bus: {err}");
+                return None;
+            }
+        };
 
         let mut user_proxies = Vec::new();
-        for user_path in accounts_proxy.list_cached_users().await? {
-            let user_proxy = UserProxy::builder(&dbus_system_conn)
-                .path(user_path)?
-                .build()
-                .await?;
-
-            user_proxies.push(user_proxy);
+        for user_path in user_paths {
+            let builder = match UserProxy::builder(&dbus_system_conn)
+                .path(user_path)
+            {
+                Ok(b) => b,
+                Err(err) => {
+                    debug!("Failed to set user proxy path: {err}");
+                    continue;
+                }
+            };
+            match builder.build().await {
+                Ok(proxy) => user_proxies.push(proxy),
+                Err(err) => {
+                    debug!("Failed to build user proxy: {err}");
+                }
+            }
         }
 
         let mut usernames = HashMap::new();
-
         for user_proxy in &user_proxies {
-            let mut real_name = user_proxy.real_name().await?;
-            let user_name = user_proxy.user_name().await?;
-
-            // If real name is not set, just use the username instead
-            if real_name.is_empty() {
-                real_name.clone_from(&user_name);
+            let real_name = user_proxy.real_name().await.unwrap_or_default();
+            let user_name = user_proxy.user_name().await.unwrap_or_default();
+            if !user_name.is_empty() {
+                let display_name = if real_name.is_empty() {
+                    user_name.clone()
+                } else {
+                    real_name
+                };
+                usernames.insert(display_name, user_name);
             }
-
-            usernames.insert(real_name, user_name);
         }
 
         let mut shells = HashMap::new();
-
         for user_proxy in &user_proxies {
-            let user_name = user_proxy.user_name().await?;
-            let shell = user_proxy.shell().await?;
-
-            shells.insert(user_name, shell);
+            let user_name = user_proxy.user_name().await.unwrap_or_default();
+            let shell = user_proxy.shell().await.unwrap_or_default();
+            if !user_name.is_empty() {
+                shells.insert(user_name, shell);
+            }
         }
 
-        Ok(Self {
-            users: usernames,
-            shells,
-            sessions: Self::init_sessions(config).await?,
-        })
+        Some((usernames, shells))
     }
 
     /// Get available X11 and Wayland sessions.
