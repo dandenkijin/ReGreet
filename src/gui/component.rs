@@ -427,16 +427,15 @@ impl AsyncComponent for Greeter {
         let glass_enabled = glass_config.enabled || appearance.enable_glass_effect;
         if glass_enabled {
 
-            debug!(
-                "Applying liquid glass effect (blur={}px, opacity={})",
-                glass_config.blur, glass_config.opacity
+            info!(
+                "Applying liquid glass effect (blur=25px)",
             );
             let provider = gtk::CssProvider::new();
             provider.load_from_data(&generate_glass_css(glass_config));
             gtk::style_context_add_provider_for_display(
                 &widgets.ui.display(),
                 &provider,
-                gtk::STYLE_PROVIDER_PRIORITY_USER,
+                gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
             );
         }
 

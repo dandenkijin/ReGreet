@@ -43,8 +43,7 @@ impl WidgetTemplate for Ui {
             add_overlay = &gtk::Frame {
                 set_halign: gtk::Align::Center,
                 set_valign: gtk::Align::Center,
-                add_css_class: "background",
-                add_css_class: "glass-login",
+                add_css_class: "glass-card",
 
                 gtk::Grid {
                     set_column_spacing: 15,

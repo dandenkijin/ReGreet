@@ -7,31 +7,18 @@
 use crate::config::GlassConfig;
 
 /// Generate the glass CSS string from the given config values.
-pub fn generate_glass_css(config: &GlassConfig) -> String {
-    format!(
-        r#".glass-login {{
-    background-color: rgba(255, 255, 255, {opacity}) !important;
-    backdrop-filter: blur({blur}px) !important;
-    -webkit-backdrop-filter: blur({blur}px) !important;
-    border-radius: {border_radius}px !important;
-    border: 1px solid {border_color} !important;
-    box-shadow:
-        0 8px 32px {shadow_color},
-        inset 0 1px 0 {highlight_color} !important;
-    animation: glass-breathe {duration} ease-in-out infinite;
-}}
+pub fn generate_glass_css(_config: &GlassConfig) -> String {
+    // Use hardcoded values for reliable glass effect
+    r##".glass-card {
+    background-color: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(25px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 20px;
+}
 
-@keyframes glass-breathe {{
-    0%, 100% {{ opacity: 1; }}
-    50% {{ opacity: {opacity_min}; }}
-}}"#,
-        opacity = config.opacity,
-        blur = config.blur,
-        border_radius = config.border_radius,
-        border_color = config.border_color,
-        shadow_color = config.shadow_color,
-        highlight_color = config.highlight_color,
-        duration = config.duration,
-        opacity_min = config.opacity_min,
-    )
+@keyframes glass-breathe {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.9; }
+}"##.to_string()
 }
