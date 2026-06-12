@@ -4,7 +4,7 @@
 
 //! Setup for using the greeter as a Relm4 component
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use relm4::{
     AsyncComponentSender,
@@ -126,10 +126,22 @@ fn setup_users_sessions(model: &Greeter, widgets: &GreeterWidgets) {
 
 async fn setup_background(model: &Greeter, widgets: &GreeterWidgets) {
     if let Some(bg_path) = model.config.get_background() {
-        let media = gtk::MediaFile::for_filename(bg_path);
-        media.set_loop(true);
-        media.play();
-        widgets.ui.background.set_paintable(Some(&media));
+        let path = std::path::Path::new(bg_path);
+        if path.exists() {
+            // For static images, use set_filename directly on Picture
+            // This avoids GStreamer pipeline issues with static images
+            widgets.ui.background.set_filename(Some(bg_path));
+            // Set content fit if GTK 4.8+ feature is enabled
+            #[cfg(feature = "gtk4_8")]
+            widgets.ui.background.set_content_fit(match model.config.get_background_fit() {
+                crate::config::BgFit::Fill => gtk::ContentFit::Fill,
+                crate::config::BgFit::Contain => gtk::ContentFit::Contain,
+                crate::config::BgFit::Cover => gtk::ContentFit::Cover,
+                crate::config::BgFit::ScaleDown => gtk::ContentFit::ScaleDown,
+            });
+        } else {
+            warn!("Background image not found: {bg_path}");
+        }
     }
 }
 
