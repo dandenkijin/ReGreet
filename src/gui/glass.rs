@@ -10,14 +10,14 @@ use crate::config::GlassConfig;
 pub fn generate_glass_css(config: &GlassConfig) -> String {
     format!(
         r#".glass-login {{
-    background-color: rgba(255, 255, 255, {opacity});
-    backdrop-filter: blur({blur}px);
-    -webkit-backdrop-filter: blur({blur}px);
-    border-radius: {border_radius}px;
-    border: 1px solid {border_color};
+    background-color: rgba(255, 255, 255, {opacity}) !important;
+    backdrop-filter: blur({blur}px) !important;
+    -webkit-backdrop-filter: blur({blur}px) !important;
+    border-radius: {border_radius}px !important;
+    border: 1px solid {border_color} !important;
     box-shadow:
         0 8px 32px {shadow_color},
-        inset 0 1px 0 {highlight_color};
+        inset 0 1px 0 {highlight_color} !important;
     animation: glass-breathe {duration} ease-in-out infinite;
 }}
 

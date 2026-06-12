@@ -19,12 +19,23 @@ use crate::tomlutils::load_toml;
 pub struct AppearanceSettings {
     #[serde(default = "default_greeting_msg")]
     pub greeting_msg: String,
+
+    /// Enable glass effect (FloGreet compatibility alias).
+    #[serde(default)]
+    pub enable_glass_effect: bool,
+
+    /// Type of glass effect: "liquid", "bubble", or "particles" (FloGreet compatibility).
+    #[serde(default)]
+    #[allow(dead_code)]
+    pub glass_effect_type: String,
 }
 
 impl Default for AppearanceSettings {
     fn default() -> Self {
         AppearanceSettings {
             greeting_msg: default_greeting_msg(),
+            enable_glass_effect: false,
+            glass_effect_type: String::new(),
         }
     }
 }
@@ -197,7 +208,7 @@ pub struct Config {
     skip_selection: bool,
 
     #[serde(default)]
-    appearance: AppearanceSettings,
+    pub appearance: AppearanceSettings,
 
     #[serde(default)]
     env: HashMap<String, String>,

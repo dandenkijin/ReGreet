@@ -384,10 +384,20 @@ See [`regreet.sample.toml`](regreet.sample.toml) for descriptions of each option
 renders with the semi-transparent background, border, and animation — just
 without the backdrop blur. The effect degrades gracefully.
 
+**Compositor note:** `backdrop-filter: blur()` requires a compositor that
+supports offscreen rendering and compositing. This works on Sway, Hyprland,
+Niri, and other wlroots-based or similar compositors. Minimal compositors
+like **Cage** do not support this feature — the glass card will still render
+with the semi-transparent background and border, but without the blur.
+
 You can override any glass style property in your
-[custom CSS](#custom-css) by targeting the `.glass-login` class. Custom CSS
-generated from config is loaded before your `regreet.css`, so your CSS takes
-precedence.
+[custom CSS](#custom-css) by targeting the `.glass-login` class. Glass CSS
+is loaded after your `regreet.css` with `PRIORITY_USER`, so glass styles
+take precedence over custom CSS.
+
+**FloGreet compatibility:** The config keys `[appearance] enable_glass_effect = true`
+and `[appearance] glass_effect_type = "liquid"` are also accepted as aliases
+for `[glass] enabled = true`, using the default glass parameter values.
 
 ### Changing Reboot/Shut Down Commands
 

@@ -408,22 +408,6 @@ impl AsyncComponent for Greeter {
         setup_users_sessions(&model, &widgets);
         setup_background(&model, &widgets).await;
 
-        // Apply the liquid glass effect if enabled in config.
-        let glass_config = model.config.get_glass();
-        if glass_config.enabled {
-            debug!(
-                "Applying liquid glass effect (blur={}px, opacity={})",
-                glass_config.blur, glass_config.opacity
-            );
-            let provider = gtk::CssProvider::new();
-            provider.load_from_data(&generate_glass_css(glass_config));
-            gtk::style_context_add_provider_for_display(
-                &widgets.ui.display(),
-                &provider,
-                gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
-            );
-        }
-
         if input.css_path.exists() {
             debug!("Loading custom CSS from file: {}", input.css_path.display());
             let provider = gtk::CssProvider::new();
@@ -433,7 +417,28 @@ impl AsyncComponent for Greeter {
                 &provider,
                 gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
             );
-        };
+        }
+
+        // Apply the liquid glass effect if enabled in config.
+        // Supports both [glass] enabled = true and [appearance] enable_glass_effect = true.
+        // Load after custom CSS so glass styles take precedence.
+        let glass_config = model.config.get_glass();
+        let appearance = &model.config.appearance;
+        let glass_enabled = glass_config.enabled || appearance.enable_glass_effect;
+        if glass_enabled {
+
+            debug!(
+                "Applying liquid glass effect (blur={}px, opacity={})",
+                glass_config.blur, glass_config.opacity
+            );
+            let provider = gtk::CssProvider::new();
+            provider.load_from_data(&generate_glass_css(glass_config));
+            gtk::style_context_add_provider_for_display(
+                &widgets.ui.display(),
+                &provider,
+                gtk::STYLE_PROVIDER_PRIORITY_USER,
+            );
+        }
 
         // Set the default behaviour of pressing the Return key to act like the login button.
         root.set_default_widget(Some(&widgets.ui.login_button));
