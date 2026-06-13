@@ -139,9 +139,9 @@ fn default_greeting_msg() -> String {
 }
 
 /// Struct for the liquid glass login card effect
-#[derive(Default, Deserialize)]
+#[derive(Deserialize)]
 pub struct GlassConfig {
-    #[serde(default)]
+    #[serde(default = "default_glass_enabled")]
     pub enabled: bool,
 
     #[serde(default = "default_glass_blur")]
@@ -151,9 +151,11 @@ pub struct GlassConfig {
     pub opacity: f64,
 
     #[serde(default = "default_glass_opacity_min")]
+    #[allow(dead_code)]
     pub opacity_min: f64,
 
     #[serde(default = "default_glass_duration")]
+    #[allow(dead_code)]
     pub duration: String,
 
     #[serde(default = "default_glass_border_radius")]
@@ -163,22 +165,44 @@ pub struct GlassConfig {
     pub border_color: String,
 
     #[serde(default = "default_glass_highlight_color")]
+    #[allow(dead_code)]
     pub highlight_color: String,
 
     #[serde(default = "default_glass_shadow_color")]
+    #[allow(dead_code)]
     pub shadow_color: String,
 }
 
+impl Default for GlassConfig {
+    fn default() -> Self {
+        Self {
+            enabled: default_glass_enabled(),
+            blur: default_glass_blur(),
+            opacity: default_glass_opacity(),
+            opacity_min: default_glass_opacity_min(),
+            duration: default_glass_duration(),
+            border_radius: default_glass_border_radius(),
+            border_color: default_glass_border_color(),
+            highlight_color: default_glass_highlight_color(),
+            shadow_color: default_glass_shadow_color(),
+        }
+    }
+}
+
+fn default_glass_enabled() -> bool {
+    true
+}
+
 fn default_glass_blur() -> u32 {
-    39
+    25
 }
 
 fn default_glass_opacity() -> f64 {
-    0.07
+    0.15
 }
 
 fn default_glass_opacity_min() -> f64 {
-    0.88
+    0.9
 }
 
 fn default_glass_duration() -> String {
@@ -186,11 +210,11 @@ fn default_glass_duration() -> String {
 }
 
 fn default_glass_border_radius() -> u32 {
-    20
+    16
 }
 
 fn default_glass_border_color() -> String {
-    "rgba(255, 255, 255, 0.15)".to_string()
+    "rgba(255, 255, 255, 0.25)".to_string()
 }
 
 fn default_glass_highlight_color() -> String {
@@ -198,7 +222,7 @@ fn default_glass_highlight_color() -> String {
 }
 
 fn default_glass_shadow_color() -> String {
-    "rgba(0, 0, 0, 0.3)".to_string()
+    "rgba(0, 0, 0, 0.1)".to_string()
 }
 
 /// The configuration struct

@@ -390,6 +390,9 @@ Niri, and other wlroots-based or similar compositors. Minimal compositors
 like **Cage** do not support this feature — the glass card will still render
 with the semi-transparent background and border, but without the blur.
 
+See [Glass Effect — Wayland Compositor Compatibility](docs/glass-effect.md) for
+detailed compatibility matrix, troubleshooting, and technical details.
+
 You can override any glass style property in your
 [custom CSS](#custom-css) by targeting the `.glass-login` class. Glass CSS
 is loaded after your `regreet.css` with `PRIORITY_USER`, so glass styles
